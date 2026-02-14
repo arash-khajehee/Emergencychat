@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact List</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+    }
+
+    .contact-list {
+      max-width: 320px;
+      width: 100%;
+      padding: 20px;
+      background-color: white;
+      border-right: 1px solid #ddd;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .contact-list h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      color: #333;
+    }
+
+    .contact {
+      display: flex;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .contact:hover {
+      background-color: #f0f4fa;
+    }
+
+    .contact img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 16px;
+    }
+
+    .contact-name {
+      font-size: 1rem;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .contact-status {
+      font-size: 0.9rem;
+      color: #888;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="contact-list">
+    <h2>Contacts</h2>
+    <a href="{% url 'group:logout' %}" ><h2>LogOut</h2></a>
+
+    {% for i in all_group %}
+    <div class="contact">
+    <a href="{% url 'group:chat' username password i.id %}" >
+      <div>
+        <div class="contact-name">{{i.group_title}}</div>
+        <div class="contact-status">{{i.group_date}}</div>
+      </div>
+    </a>
+    </div>
+
+    {% endfor %}
+    {% for i in all_secure_group %}
+    <div class="contact">
+    <a href="{% url 'group:securechat' username password i.id %}" >
+      <div>
+        
+        <div class="contact-name">{{i.securegroup_title}}</div>
+        <div class="contact-status">{{i.securegroup_date}}</div>
+        <div >type : Secure</div>
+      </div>
+    </a>
+    </div>
+
+    {% endfor %}
+
+
+  </div>
+
+</body>
+</html>

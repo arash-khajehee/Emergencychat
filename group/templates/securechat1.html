@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secure Chat - {{obj_group.securegroup_title}}</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, sans-serif;
+    }
+
+    body {
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .chat-container {
+      width: 380px;
+      background: #fff;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, .1);
+    }
+
+    .messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .own-bubble {
+      background: #a8d8ff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      max-width: 85%;
+      margin-left: auto;
+      white-space: normal;
+      overflow-wrap: break-word;
+    }
+
+    .bubble {
+      background: #e9e9eb;
+      padding: 10px 12px;
+      border-radius: 8px;
+      max-width: 85%;
+      white-space: normal;
+      overflow-wrap: break-word;
+    }
+
+    .sender {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #333;
+    }
+
+    body {
+      color: #333;
+    }
+
+    .reply-btn {
+      position: absolute;
+      top: 0;
+      right: -5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      opacity: 0;
+    }
+
+    .own-reply-btn {
+      position: absolute;
+      top: 0;
+      left: -5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      opacity: 0;
+    }
+
+    .message:hover .own-reply-btn {
+      opacity: 1;
+    }
+
+    .message:hover .reply-btn {
+      opacity: 1;
+    }
+
+    /* Reply reference block (inside sent message) */
+    .reply-reference {
+      border-left: 3px solid #4a90e2;
+      padding-left: 8px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #555;
+      cursor: pointer;
+    }
+
+    /* Composer */
+    .composer {
+      border-top: 1px solid #ddd;
+      padding: 10px;
+    }
+
+    .reply-preview {
+      background: #f0f4ff;
+      border-left: 4px solid #4a90e2;
+      padding: 8px;
+      margin-bottom: 6px;
+      display: none;
+      position: relative;
+    }
+
+    .reply-preview strong {
+      font-size: 13px;
+    }
+
+    .reply-preview span {
+      font-size: 13px;
+      color: #444;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cancel-reply {
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    input {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .send {
+      padding: 8px 14px;
+      border: none;
+      background: #4a90e2;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      display: block;
+      font-size: 14px;
+    }
+
+    .send>label {
+      cursor: pointer;
+    }
+
+    .send:hover {
+      background-color: #2e7bd3;
+    }
+
+    .message-date {
+      font-size: 10px;
+      margin-top: 6px;
+      opacity: 0.6;
+    }
+
+    .replied-message {
+      background-color: #4dafff50;
+      border-radius: 6px;
+      padding: 4px;
+      font-size: 11px;
+      border-left: 4px solid #4a90e2;
+      margin-bottom: 4px;
+    }
+
+    .replied-user {
+      color: #23558f;
+    }
+
+    .pagination {
+      margin-bottom: 14px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .pagination>a {
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      background-color: #e9e9eb;
+      font-weight: 500;
+      color: #444;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+
+    .pagination>a:hover {
+      background-color: #ddd;
+    }
+
+    body {
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100dvh;
+    }
+
+
+    .custom-select {
+      flex-grow: 1;
+      position: relative;
+    }
+
+    .custom-select>.selected {
+      width: 100%;
+      border: none;
+      height: 100%;
+      border-radius: 6px;
+      background-color: #e9e9eb;
+      text-align: center;
+      font-weight: 500;
+      color: #444;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+
+    .custom-select>.selected:hover {
+      background-color: #ddd;
+    }
+
+    .custom-select>.options {
+      position: absolute;
+      top: 100%;
+      margin-top: 2px;
+      z-index: 10;
+      left: 0;
+      width: 100%;
+      background-color: #e9e9eb;
+      border-radius: 6px;
+      box-shadow: 0 4px 6px #0000001a;
+      border: 1px solid #0000001a;
+      overflow: hidden;
+      display: none;
+    }
+
+    .custom-select:focus-within>.options {
+      display: block;
+    }
+
+    .custom-select>.options>a {
+      padding: 4px 0px;
+      text-align: center;
+      display: block;
+      border: none;
+      background-color: transparent;
+      width: 100%;
+      cursor: pointer;
+      font-weight: 500;
+      color: #444;
+      text-decoration: none;
+    }
+
+    .custom-select>.options>a:hover {
+      background-color: #ddd;
+    }
+
+    .custom-select>.options>a.active {
+      background-color: #ddd;
+    }
+
+    .custom-select>.options>*:not(:last-child) {
+      border-bottom: 1px solid #aaaaaa88;
+    }
+
+    @media only screen and (max-width: 768px) {
+      body {
+        padding: 0
+      }
+
+      .chat-container {
+        width: 100%;
+        border-radius: 0;
+        height: 100%;
+      }
+    }
+
+    .message-footer {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .reply-button {
+      border: none;
+      background-color: transparent;
+      color: #444;
+      padding: 0;
+      font-size: 12px;
+    }
+
+    .group-title {
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .group {
+      padding: 6px 8px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 12px;
+      color: #444;
+      margin-bottom: 20px;
+    }
+
+    .users-title {
+      color: #555;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="chat-container">
+
+
+    <div class="messages" id="messages">
+      <div class="pagination">
+        <a href="{% url 'group:chatlist' username password %}">Chat List</a>
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">Newer</a>
+        {% endif %}
+        <div class="custom-select">
+          <button class="selected">Page: {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</button>
+          <div class="options">
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <a href="?page={{ num }}" class="active">{{num}}</a>
+              {% else %}   
+                <a href="?page={{ num }}">{{num}}</a>
+              {% endif %}
+              {% endfor %}
+          </div>
+        </div>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Older</a>
+        {% endif %}
+        <a href="{% url 'group:securechat' username password obj_group.id %}">Reresh</a>
+      </div>
+
+      <div class="group">
+        <div class="group-title">{{obj_group.securegroup_title}}</div>
+        {% if member_no < 9 %}
+        <div class="users-title">Members</div>
+        <div>
+          {% for oo in obj_group.securegroup_member.all %}
+            {{ oo.alluser_username }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </div>
+        </div>
+        {% endif %}
+      
+
+
+      {% for i in page_obj reversed  %}
+        {% if i.securemessages_member == user_obj and i.securemessages_replymessage is none %}
+          <div class="message">
+            <div class="own-bubble">
+              <div class="sender">{{ user_obj.alluser_username }}</div>
+              <span class="message-text">{{i.securemessages_text}}</span>
+              {% if i.securemessages_file %}
+                <a href="{{ i.securemessages_file.url }}"><div class="message-date">J{{i.securemessages_file}}</div></a>
+              {% endif %}
+              <div class="message-footer">
+                <div class="message-date">J{{i.securemessages_time}}</div>
+                <a href="{% url 'group:replymessage' username password obj_group.id i.id %}"><button class="reply-button">Reply</button></a>
+              </div>
+            </div>
+          </div>
+        {% elif i.securemessages_member == user_obj and i.securemessages_replymessage is not none %}
+          <div class="message">
+            <div class="own-bubble">
+              <div class="sender">{{ user_obj.alluser_username }}</div>
+              <div class="replied-message">
+                <div class="replied-user">{{i.securemessages_replymessage.securemessages_member.alluser_username}}</div>
+                <span class="message-text"><div>{{i.securemessages_replymessage.securemessages_text | truncatewords:5 }}</div></span>
+              </div>
+              <span class="message-text">{{i.securemessages_text}}</span>
+              {% if i.securemessages_file %}
+                <a href="{{ i.securemessages_file.url }}"><div class="message-date">J{{i.securemessages_file }}</div></a>
+              {% endif %}
+              <div class="message-footer">
+                <div class="message-date">{{i.securemessages_time}}</div>
+                <a href="{% url 'group:replymessage' username password obj_group.id i.id %}"><button class="reply-button">Reply</button></a>
+              </div>
+            </div>
+          </div>
+        {% elif i.securemessages_member != user_obj and i.securemessages_replymessage is none %}
+                <div class="message" id="msg-1">
+                <div class="bubble">
+                  <div class="sender">{{ i.securemessages_member.alluser_username }}</div>
+                  <span class="message-text">{{i.securemessages_text}}</span>
+                    {% if i.securemessages_file %}
+                      <a href="{{ i.securemessages_file.url }}"><div class="message-date">J{{i.securemessages_file }}</div></a>
+                    {% endif %}
+                  <div class="message-footer">
+                    <div class="message-date">{{i.securemessages_time}}</div>
+                    <a href="{% url 'group:replymessage' username password obj_group.id i.id %}"><button class="reply-button">Reply</button></a>
+                  </div>
+                </div>
+              </div>
+        {% elif i.securemessages_member != user_obj and i.securemessages_replymessage is not none %}
+            <div class="message" id="msg-2">
+              <div class="bubble">
+                <div class="sender">{{ i.securemessages_member.alluser_username }}</div>
+                <div class="replied-message">
+                  <div class="replied-user">{{i.securemessages_replymessage.securemessages_member.alluser_username}}</div>
+                  <span class="message-text"><div>{{i.securemessages_replymessage.securemessages_text | truncatewords:5 }}</div></span>
+                </div>
+                <span class="message-text">{{i.securemessages_text}}</span>
+                {% if i.securemessages_file %}
+                  <a href="{{ i.securemessages_file.url }}"><div class="message-date">J{{i.securemessages_file }}</div></a>
+                {% endif %}
+                <div class="message-footer">
+                  <div class="message-date">{{i.securemessages_time}}</div>
+                  <a href="{% url 'group:replymessage' username password obj_group.id i.id %}"><button class="reply-button">Reply</button></a>
+                </div>
+              </div>
+            </div>     
+        {% endif %}
+      {% endfor %}
+
+
+    <div class="composer">
+
+      <form method="post" enctype="multipart/form-data" id="chat-form">
+      {% csrf_token %}
+      <div class="input-row">
+        <input id="chat-message" autocomplete="off" required placeholder="Type a message…" />
+        <input type="hidden" name="text"  id="encryptedText" />
+        <button class="send">Send</button>
+        <div class="send">
+          <label for="fileInput">File</label>
+          <input type="file" name="file" hidden id="fileInput" />
+        </div>
+      </div>
+      </form>
+    </div>
+
+  </div>
+
+  <script>
+    
+    const chat = document.querySelector("#messages");
+    chat.scrollTop = chat.scrollHeight; 
+                  async function deriveKeyFromString(password, salt) {
+        const baseKey = await crypto.subtle.importKey(
+          "raw",
+          new TextEncoder().encode(password),
+          "PBKDF2",
+          false,
+          ["deriveKey"]
+        );
+
+        return crypto.subtle.deriveKey(
+          {
+            name: "PBKDF2",
+            salt,
+            iterations: 100_000,
+            hash: "SHA-256",
+          },
+          baseKey,
+          { name: "AES-GCM", length: 256 },
+          false,
+          ["encrypt", "decrypt"]
+        );
+      }
+
+      async function encryptWithPasswordKey(aesKey, message) {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const encoded = new TextEncoder().encode(message);
+
+        const ciphertext = await crypto.subtle.encrypt(
+          { name: "AES-GCM", iv },
+          aesKey,
+          encoded
+        );
+
+        return {
+          iv: btoa(String.fromCharCode(...iv)),
+          ciphertext: btoa(String.fromCharCode(...new Uint8Array(ciphertext))),
+        };
+      }
+
+      async function decryptWithPasswordKey(aesKey, encrypted) {
+        const iv = Uint8Array.from(atob(encrypted.iv), (c) => c.charCodeAt(0));
+        const ciphertext = Uint8Array.from(atob(encrypted.ciphertext), (c) =>
+          c.charCodeAt(0)
+        );
+
+        const plaintext = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv },
+          aesKey,
+          ciphertext
+        );
+
+        return new TextDecoder().decode(plaintext);
+      }
+
+      async function main() {
+        const chatFormEl = document.querySelector("#chat-form");
+        const chatMessageEl = document.querySelector("#chat-message");
+        const encryptedTextEl = document.querySelector("#encryptedText");
+
+        const PASSWORD = "{{ obj_group.group_title }}";
+        const SALT = new Uint8Array([115, 83, 76, 185, 54, 183, 200, 62, 9, 198, 78, 96, 16, 120, 209, 68])
+        const key = await deriveKeyFromString(PASSWORD, SALT);
+
+        chatFormEl.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const message = chatMessageEl.value;
+
+          console.log({message})
+          const encrypted = await encryptWithPasswordKey(key, message);
+          console.log({encrypted})
+          encryptedTextEl.value = JSON.stringify(encrypted);
+          event.target.submit();
+        });
+
+        function decryptMessages() {
+          const messages = [...document.querySelectorAll(".message-text")];
+          messages.forEach(async (messageEl) => {
+                      
+                        const encrypted = JSON.parse(messageEl.textContent);
+                      
+            const decrypted = await decryptWithPasswordKey(key, encrypted);
+            messageEl.textContent = decrypted;
+            
+
+          });
+        }
+
+        decryptMessages();
+      }
+
+      main();
+
+
+  </script>
+
+
+</body>
+
+</html>
